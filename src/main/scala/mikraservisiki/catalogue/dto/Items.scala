@@ -8,7 +8,9 @@ object Items {
 
   case class ItemCreationParametersDto(name: String, price: Double,  amount: Long)
 
-  case class ItemAdditionParametersDto(id: Long, amount: Int, username: String)
+  case class ItemAdditionParametersDto(id: Long, amount: Long)
+
+
 
   implicit val itemDtoFormat: Format[ItemDto] = Json.format[ItemDto]
   implicit val itemAdditionParametersDtoFormat: Format[ItemAdditionParametersDto] = Json.format[ItemAdditionParametersDto]

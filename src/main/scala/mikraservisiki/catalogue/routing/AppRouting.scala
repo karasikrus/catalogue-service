@@ -32,8 +32,12 @@ object AppRouting extends RouteDirectives
         onSuccess(catalogueService.createItem(itemCreationParametersDto)) { item =>
           complete(item)
         }
+      } ~ (path(LongNumber / "addition" / LongNumber) & post) { (id, addedAmount) =>
+        onSuccess(catalogueService.addExistingItems(id, addedAmount)) { item =>
+          complete(item)
+        }
+
+
       }
-
-
     }
 }

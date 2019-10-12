@@ -1,6 +1,6 @@
 package mikraservisiki.catalogue.handler
 
-import mikraservisiki.catalogue.dto.Items.{ItemDto,ItemCreationParametersDto}
+import mikraservisiki.catalogue.dto.Items.{ItemAdditionParametersDto, ItemCreationParametersDto, ItemDto}
 import mikraservisiki.catalogue.dao.ItemsDao
 import mikraservisiki.catalogue.schema.TableDefinitions.Item
 
@@ -15,7 +15,7 @@ trait CatalogueService{
 
   def createItem(item: ItemCreationParametersDto): Future[ItemDto]
 
-
+  def addExistingItems(id: Long, addedAmount: Long): Future[Option[ItemDto]]
 
 }
 
@@ -35,6 +35,12 @@ class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
   override def createItem(item: ItemCreationParametersDto): Future[ItemDto] =
     itemsDao.createItem(item.name, item.price, item.amount).flatMap{ item =>
       Future(ItemDto(item.id, item.name, item.price, item.amount))
+    }
+
+  override def addExistingItems(id: Long, addedAmount: Long): Future[Option[ItemDto]] =
+    itemsDao.addExistingItems(id, addedAmount).flatMap{
+      case true => getItem(id)
+      case false => Future.successful(None)
     }
 
 
