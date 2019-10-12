@@ -5,7 +5,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.{FutureDirectives, MethodDirectives, PathDirectives, RouteDirectives}
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-import mikraservisiki.catalogue.handler.{CatalogueService}
+import mikraservisiki.catalogue.handler.CatalogueService
+
+import scala.util.{Failure, Success}
 
 object AppRouting extends RouteDirectives
   with PathDirectives
@@ -36,7 +38,12 @@ object AppRouting extends RouteDirectives
         onSuccess(catalogueService.addExistingItems(id, addedAmount)) { item =>
           complete(item)
         }
-
+      }~ (path(LongNumber / "subtraction" / LongNumber) & post) { (id, subtractedAmount) =>
+        val subtractResult = catalogueService.subtractExistingItems(id, subtractedAmount)
+        onComplete(subtractResult) {
+          case Success(item) => complete(item)
+          case Failure(exception) => complete((StatusCodes.PreconditionFailed, exception.getMessage))
+        }
 
       }
     }

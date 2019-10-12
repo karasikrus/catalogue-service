@@ -21,6 +21,8 @@ trait ItemsDao {
 
   def addExistingItems(id: Long, amount: Long): Future[Boolean]
 
+  def subtractExistingItems(id: Long, amount: Long): Future[Boolean]
+
 
 }
 
@@ -40,6 +42,12 @@ object RelationalItemsDao extends ItemsDao
   override def addExistingItems(id: Long, amount: Long): Future[Boolean] = db.run(
     sqlu"""UPDATE items SET amount = amount + $amount WHERE id = $id"""
   ).map(_ == 1)
+
+
+  override def subtractExistingItems(id: Long, amount: Long): Future[Boolean] = db.run(
+    sqlu"""UPDATE items SET amount = amount - $amount WHERE id = $id AND amount >= $amount"""
+  ).map(_ == 1)
+
 
 
 

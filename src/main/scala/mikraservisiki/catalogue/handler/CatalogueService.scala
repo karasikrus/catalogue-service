@@ -17,6 +17,8 @@ trait CatalogueService{
 
   def addExistingItems(id: Long, addedAmount: Long): Future[Option[ItemDto]]
 
+  def subtractExistingItems(id: Long, subtractedAmount: Long): Future[Option[ItemDto]]
+
 }
 
 class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
@@ -43,5 +45,10 @@ class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
       case false => Future.successful(None)
     }
 
+  override def subtractExistingItems(id: Long, subtractedAmount: Long): Future[Option[ItemDto]] =
+    itemsDao.subtractExistingItems(id, subtractedAmount).flatMap{
+      case true => getItem(id)
+      case false => Future.failed(new RuntimeException("Number of items is too small to continue"))
+    }
 
 }
