@@ -19,15 +19,12 @@ trait CatalogueService {
 }
 
 class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
-  override def getItems: Future[Seq[ItemDto]] = (
-    for (
-      items <- itemsDao.getItems
-    ) yield for (
-      item <- items
-    ) yield for (
-      reservationAmount <- itemsDao.getReservedAmount(item.id)
-    ) yield ItemDto(item.id, item.name, item.price, item.initialAmount - reservationAmount)
-    ).flatMap(Future.sequence)
+  override def getItems: Future[Seq[ItemDto]] =
+    itemsDao.getItems.flatMap(Future.traverse(_) { item =>
+      itemsDao.getReservedAmount(item.id).map { reservationAmount =>
+        ItemDto(item.id, item.name, item.price, item.initialAmount - reservationAmount)
+      }
+    })
 
   override def getItem(id: Long): Future[Option[ItemDto]] = {
     val itemOptFuture = itemsDao.getItem(id)
