@@ -37,9 +37,9 @@ object TableDefinitions {
     class Reservations(tag: Tag) extends Table[Reservation](tag, "reservations") {
       def * = (itemId, orderId, amount) <> (Reservation.tupled, Reservation.unapply)
 
-      def itemId = column[Long]("item_id")
+      def itemId = column[Long]("item_id", O.PrimaryKey)
 
-      def orderId = column[Long]("order_id")
+      def orderId = column[Long]("order_id", O.PrimaryKey)
 
       def amount = column[Int]("amount")
 
