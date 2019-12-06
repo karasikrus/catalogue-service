@@ -2,9 +2,15 @@ name := "catalogue-service"
 
 version := "0.1"
 
+resolvers ++= Seq(
+  "avast" at "https://dl.bintray.com/avast/maven"
+)
+
 scalaVersion := "2.12.5"
 
 enablePlugins(JavaServerAppPackaging)
+
+val opRabbitVersion = "2.1.0"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.5.12",
@@ -12,6 +18,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.7.3",
   "de.heikoseeberger" %% "akka-http-play-json" % "1.29.1",
   "com.typesafe.akka" %% "akka-stream" % "2.5.12",
+  "com.spingo" %% "op-rabbit-core" % opRabbitVersion,
+  "com.spingo" %% "op-rabbit-play-json" % opRabbitVersion,
   "com.typesafe.slick" %% "slick" % "3.2.3",
   "com.h2database" % "h2" % "1.4.192",
   "org.postgresql" % "postgresql" % "42.2.8",

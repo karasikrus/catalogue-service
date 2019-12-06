@@ -1,11 +1,10 @@
 package mikraservisiki.catalogue.dao
 
 import mikraservisiki.catalogue.HasDbConfigProvider
-import mikraservisiki.catalogue.schema.TableDefinitions.{Item, ItemsTable, ReservationsTable}
+import mikraservisiki.catalogue.schema.TableDefinitions.{Item, ItemsTable, Reservation, ReservationsTable}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 
 
 trait ItemsDao {
@@ -20,6 +19,10 @@ trait ItemsDao {
   def addExistingItems(id: Long, amount: Long): Future[Boolean]
 
   def getReservedAmount(itemId: Long): Future[Int]
+
+  def reserveItems(reservation: Reservation): Future[Boolean]
+
+  def freeItems(orderId: Long): Future[Unit]
 }
 
 object RelationalItemsDao extends ItemsDao
@@ -42,4 +45,10 @@ object RelationalItemsDao extends ItemsDao
 
   override def getReservedAmount(itemId: Long): Future[Int] =
     db.run(reservations.filter(_.itemId === itemId).map(_.amount).sum.getOrElse(0).result)
+
+  override def reserveItems(reservation: Reservation): Future[Boolean] =
+    db.run(reservations += reservation).map(_ == 1)
+
+  override def freeItems(orderId: Long): Future[Unit] =
+    db.run(reservations.filter(_.orderId === orderId).delete).map(_ => {})
 }

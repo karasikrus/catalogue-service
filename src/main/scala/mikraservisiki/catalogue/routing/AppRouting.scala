@@ -36,15 +36,10 @@ object AppRouting extends RouteDirectives
         onSuccess(catalogueService.addExistingItems(id, addedAmount)) { item =>
           complete(item)
         }
-        /*
-        TODO нужно добавить резервацию заказа:
-        эндпоинт типа POST items/{itemid}/order/{orderid}
-        в теле запроса передаётся amount
-        нужно просто проверить, достаточно ли товаров на складе,
-        и в табличку reservations добавить запись с этими параметрами
-
-        в ответ возвращаем ItemDto
-         */
+      } ~ (post & path(LongNumber / "order" / LongNumber) & entity(as[AmountDto])) { (itemId, orderId, amountDto) =>
+        onSuccess(catalogueService.reserveItems(itemId, orderId, amountDto.amount)) { item =>
+          complete(item)
+        }
       }
     }
 }

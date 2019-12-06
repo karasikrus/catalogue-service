@@ -2,6 +2,8 @@ package mikraservisiki.catalogue.handler
 
 import mikraservisiki.catalogue.dao.ItemsDao
 import mikraservisiki.catalogue.dto.Items.{ItemCreationParametersDto, ItemDto}
+import mikraservisiki.catalogue.exceptions.NotModifiedException
+import mikraservisiki.catalogue.schema.TableDefinitions.Reservation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -16,6 +18,9 @@ trait CatalogueService {
 
   def addExistingItems(id: Long, addedAmount: Long): Future[Option[ItemDto]]
 
+  def reserveItems(itemId: Long, orderId: Long, amount: Int): Future[ItemDto]
+
+  def freeItemsByOrderId(orderId: Long): Future[Unit]
 }
 
 class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
@@ -48,5 +53,21 @@ class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
       case true => getItem(id)
       case false => Future.successful(None)
     }
+
+  override def reserveItems(itemId: Long, orderId: Long, amount: Int): Future[ItemDto] = {
+    for {
+      itemOpt <- getItem(itemId)
+      item = itemOpt.get if itemOpt.nonEmpty
+      if item.amount >= amount
+      _ <- itemsDao.reserveItems(Reservation(itemId, orderId, amount))
+        .flatMap {
+          case true => Future.successful(Unit)
+          case false => Future.failed(NotModifiedException)
+        }
+    } yield item
+  }
+
+  override def freeItemsByOrderId(orderId: Long): Future[Unit] =
+    itemsDao.freeItems(orderId)
 
 }
