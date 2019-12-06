@@ -2,7 +2,6 @@ package mikraservisiki.catalogue.handler
 
 import mikraservisiki.catalogue.dao.ItemsDao
 import mikraservisiki.catalogue.dto.Items.{ItemCreationParametersDto, ItemDto}
-import mikraservisiki.catalogue.exceptions.NotModifiedException
 import mikraservisiki.catalogue.schema.TableDefinitions.Reservation
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,10 +59,6 @@ class CatalogueServiceImpl(itemsDao: ItemsDao) extends CatalogueService {
       item = itemOpt.get if itemOpt.nonEmpty
       if item.amount >= amount
       _ <- itemsDao.reserveItems(Reservation(itemId, orderId, amount))
-        .flatMap {
-          case true => Future.successful(Unit)
-          case false => Future.failed(NotModifiedException)
-        }
     } yield item
   }
 
